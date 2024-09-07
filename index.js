@@ -9,9 +9,13 @@ const port = 3000;
 const token = '7105203558:AAGOTuTRp0MdCqpb_tonWJKOeFOXsIWvxac';
 const bot = new TelegramBot(token);
 
+// Store user information and states
+const userStore = {}; // Stores user info like names
+const userState = {}; // Stores user states: 'active', 'inactive', 'help'
+const groupChatId = '-1002150245968'; // Replace with your group chat ID
 
-// // Middleware to parse JSON request bodies
-// app.use(bodyParser.json());
+// Middleware to parse JSON request bodies
+app.use(bodyParser.json());
 
 // Define the webhook route
 app.post(`/bot${token}`, (req, res) => {
@@ -32,11 +36,6 @@ bot.setWebHook(webhookUrl).then(() => {
 }).catch((error) => {
   console.error('Error setting webhook:', error);
 });
-
-// Store user information and states
-const userStore = {}; // Stores user info like names
-const userState = {}; // Stores user states: 'active', 'inactive', 'help'
-const groupChatId = '-1002150245968'; // Replace with your group chat ID
 
 // Handle text messages
 bot.on('message', (msg) => {
@@ -141,4 +140,7 @@ bot.on('message', (msg) => {
 	  bot.sendMessage(chatId, "Unknown command. 🤷‍♂️ \n\nUse /help for a list of commands.");
 	}
   });
+  
+//   // Error handling
+//   bot.on("polling_error", (msg) => console.log(msg));
   
