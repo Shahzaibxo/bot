@@ -6,7 +6,7 @@ const app = express();
 const port = 3000;
 
 // Replace with your bot token
-const token = 'YOUR_TELEGRAM_BOT_TOKEN';
+const token = '7105203558:AAGOTuTRp0MdCqpb_tonWJKOeFOXsIWvxac';
 const bot = new TelegramBot(token);
 
 // Store user information and states
