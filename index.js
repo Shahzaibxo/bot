@@ -142,6 +142,3 @@ bot.on('message', (msg) => {
 	}
   });
   
-  // Error handling
-  bot.on("polling_error", (msg) => console.log(msg));
-  
