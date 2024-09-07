@@ -1,3 +1,6 @@
+const express = require('express');
+const app = express();
+
 const TelegramBot = require('node-telegram-bot-api');
 const token = '7105203558:AAGOTuTRp0MdCqpb_tonWJKOeFOXsIWvxac';
 const keepAlive = require("./Keep_Alive");
@@ -168,4 +171,6 @@ bot.on('video', (msg) => {
 
 // Error handling
 bot.on("polling_error", (msg) => console.log(msg));
-keepAlive()
+keepAlive(app);
+
+module.exports = app;
