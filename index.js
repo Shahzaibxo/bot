@@ -30,7 +30,7 @@ app.listen(port, () => {
 });
 
 // Set the webhook URL
-const webhookUrl = `https://telegrambot-opal.vercel.app/bot${token}`;
+const webhookUrl = `https://bot-chi-black.vercel.app/bot${token}`;
 bot.setWebHook(webhookUrl).then(() => {
   console.log('Webhook set up successfully');
 }).catch((error) => {
