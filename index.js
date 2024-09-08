@@ -66,8 +66,7 @@ bot.on('message', (msg) => {
 
         } else if (msg.text === '/exit') {
           delete userState[userId];
-          console.log(`User ${userId} has exited`);
-
+  
           bot.sendMessage(chatId, "You have exited.◀ \n\nUse /start to resume.");
         }  else if (msg.text.startsWith('/BotNewChannel')) {
             const parts = msg.text.split(' ');
