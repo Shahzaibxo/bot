@@ -1,5 +1,5 @@
 const TelegramBot = require('node-telegram-bot-api');
-const token = '7105203558:AAGOTuTRp0MdCqpb_tonWJKOeFOXsIWvxac';
+const token = '7013297460:AAHXBvovHdU0NwKlOMXiXom7g5c1gMToKXU';
 const bot = new TelegramBot(token, { polling: true });
 
 // Store user information and states
@@ -7,14 +7,13 @@ const userStore = {}; // Stores user info like names
 const userState = {}; // Stores user states: 'active', 'inactive', 'help'
 
 // Group chat ID
-let groupChatId = '-1002150245968'; // Replace with your group chat ID
+let groupChatId = null; // Replace with your group chat ID
 
 console.log("Bot it running")
 bot.on('message', (msg) => {
   const chatId = msg.chat.id;
   const userId = msg.from.id;
-  const state = userState[userId];
-  // console.log(msg)
+  console.log(msg)
   if (msg.chat.type === 'private') {
     // Delay message processing to ensure state changes are handled
     // Check the user's state
@@ -47,10 +46,7 @@ bot.on('message', (msg) => {
 });
 
 bot.on('message', (msg) => {
-  console.log(groupChatId !== null)
-  const regex = /\/admin\s+(\d+)/;
-  const match = msg.text.match(regex);
-  
+
   if (msg.text) {
 
     const chatId = msg.chat.id;
@@ -58,7 +54,42 @@ bot.on('message', (msg) => {
     if (msg.chat.type === 'private') {
       const state = userState[userId];
 
-      if (state === 'active' && groupChatId !== null ) {
+      if (msg.text.startsWith('/BotNewChannel')) {
+        const parts = msg.text.split(' ');
+        if (parts.length > 1) {
+          const value = parts.slice(1).join(' '); // Join all parts after /BotAdmin
+          const number = value.match(/\d+/); // Extract numeric value
+          console.log(number)
+          groupChatId = -number[0]
+
+          if (number) {
+            bot.sendMessage(chatId, `You have entered the ID:-${number[0]} \n\n Now you can send messages to the group with channel ID: -${number[0]}`);
+          } else {
+            bot.sendMessage(chatId, `No numeric value was found in your input.`);
+          }
+        } else {
+          bot.sendMessage(chatId, `Please provide a value after /BotNewChannel.`);
+        }
+      }
+      else if (msg.text.startsWith('/BotDeleteChannel')) {
+        groupChatId = null
+        bot.sendMessage(chatId, `Bot will now stay active but won't send messages to any channel/group.`);
+      }
+
+    }
+  }
+
+});
+
+bot.on('message', (msg) => {
+  if (msg.text) {
+
+    const chatId = msg.chat.id;
+    const userId = msg.from.id;
+    if (msg.chat.type === 'private') {
+      const state = userState[userId];
+
+      if (state === 'active' && groupChatId !== null) {
         if (msg.text === "/help") {
           userState[userId] = 'help';
 
@@ -66,29 +97,10 @@ bot.on('message', (msg) => {
 
         } else if (msg.text === '/exit') {
           delete userState[userId];
-  
+
           bot.sendMessage(chatId, "You have exited.◀ \n\nUse /start to resume.");
-        }  else if (msg.text.startsWith('/BotNewChannel')) {
-            const parts = msg.text.split(' ');
-            if (parts.length > 1) {
-                const value = parts.slice(1).join(' '); // Join all parts after /BotAdmin
-                const number = value.match(/\d+/); // Extract numeric value
-                groupChatId = -number[0]
-              
-                if (number) {
-                    bot.sendMessage(chatId, `You have entered the ID:-${number[0]} \n\n Now you can send messages to the group with channel ID: -${number[0]}`);
-                } else {
-                    bot.sendMessage(chatId, `No numeric value was found in your input.`);
-                }
-            } else {
-                bot.sendMessage(chatId, `Please provide a value after /BotNewChannel.`);
-            }
-          }
-          else if (msg.text.startsWith('/BotDeleteChannel')) {
-            groupChatId = null
-            bot.sendMessage(chatId, `Bot will now stay active but won't send messages to any channel/group.`);
-          }
-        else if (msg.text != "/start") {
+        }
+        else if (msg.text != "/start" && !msg.text.startsWith('/BotNewChannel')) {
           if (!userStore[userId]) {
             userStore[userId] = {
               name: `user${Object.keys(userStore).length + 1}`
@@ -106,13 +118,18 @@ bot.on('message', (msg) => {
 
 });
 
+
+
+
+
+
 bot.on('photo', (msg) => {
   const chatId = msg.chat.id;
   const userId = msg.from.id;
   if (msg.chat.type === 'private') {
 
     const state = userState[userId];
-    if (state === 'active') {
+    if (state === 'active' && groupChatId !== null) {
       if (!userStore[userId]) {
         userStore[userId] = {
           name: `user${Object.keys(userStore).length + 1}`
@@ -127,7 +144,6 @@ bot.on('photo', (msg) => {
           bot.sendMessage(chatId, `Your photo has been forwarded to the channel with the mention: ${userName}.`);
         })
         .catch((error) => {
-          console.error('Error forwarding photo:', error);
           bot.sendMessage(chatId, "There was an error forwarding your photo. Please try again.");
         });
     }
@@ -141,7 +157,7 @@ bot.on('video', (msg) => {
   if (msg.chat.type === 'private') {
     const state = userState[userId];
 
-    if (state === 'active') {
+    if (state === 'active' && groupChatId !== null) {
       if (!userStore[userId]) {
         userStore[userId] = {
           name: `user${Object.keys(userStore).length + 1}`
