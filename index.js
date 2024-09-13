@@ -7,13 +7,13 @@ const userStore = {}; // Stores user info like names
 const userState = {}; // Stores user states: 'active', 'inactive', 'help'
 
 // Group chat ID
-let groupChatId = null; // Replace with your group chat ID
+let groupChatId = -4583899193; // Replace with your group chat ID
 
 console.log("Bot it running")
 bot.on('message', (msg) => {
   const chatId = msg.chat.id;
   const userId = msg.from.id;
-  console.log(msg)
+  // console.log(msg)
   if (msg.chat.type === 'private') {
     // Delay message processing to ensure state changes are handled
     // Check the user's state
@@ -45,6 +45,95 @@ bot.on('message', (msg) => {
   }
 });
 
+let channels = []; // Array to store channels
+
+bot.on('my_chat_member', (update) => {
+    if (update.new_chat_member.status === 'administrator' && update.chat.type === 'channel') {
+        const channelId = update.chat.id;
+        const channelTitle = update.chat.title;
+
+        if (!channels.find(channel => channel.id === channelId)) {
+            channels.push({ id: channelId, title: channelTitle });
+            console.log("push done", channelId, channelTitle)
+        }
+    }
+});
+
+bot.onText(/\/activechannels/, (msg) => {
+  const chatId = msg.chat.id;
+
+  if (channels.length === 0) {
+      bot.sendMessage(chatId, 'No channels available.');
+      return;
+  }
+
+  const keyboard = channels.map(channel => [
+      {
+          text: channel.title,
+          callback_data: `menu1_channel_${channel.id}`
+      }
+  ]);
+
+  bot.sendMessage(chatId, 'Select a channel from Menu to activate the bot on it:', {
+      reply_markup: {
+          inline_keyboard: keyboard
+      }
+  });
+});
+
+// Handle the /menu2 command
+bot.onText(/\/deletemenu/, (msg) => {
+  const chatId = msg.chat.id;
+
+  if (channels.length === 0) {
+      bot.sendMessage(chatId, 'No channels available.');
+      return;
+  }
+
+  const keyboard = channels.map(channel => [
+      {
+          text: channel.title,
+          callback_data: `menu2_channel_${channel.id}`
+      }
+  ]);
+
+  bot.sendMessage(chatId, 'Select a channel from Menu to remove channel from list:', {
+      reply_markup: {
+          inline_keyboard: keyboard
+      }
+  });
+});
+
+// Handle callback queries from Menu 1
+bot.on('callback_query', (callbackQuery) => {
+  const chatId = callbackQuery.message.chat.id;
+  const data = callbackQuery.data;
+
+  if (data.startsWith('menu1_channel_')) {
+      const channelId = data.replace('menu1_channel_', '');
+      const channel = channels.find(c => c.id === parseInt(channelId, 10));
+
+      if (channel) {
+        groupChatId=channelId
+          bot.sendMessage(chatId, `Bot will now work on: ${channel.title}`);
+      } else {
+          bot.sendMessage(chatId, 'Channel not found.');
+      }
+  } else if (data.startsWith('menu2_channel_')) {
+      const channelId = data.replace('menu2_channel_', '');
+      const channel = channels.find(c => c.id === parseInt(channelId, 10));
+
+      if (channel) {
+        channels = channels.filter(channnel => channnel.id !== channel.id);
+        if(groupChatId==channel.id){
+          groupChatId=null
+        }
+          bot.sendMessage(chatId, `${channel.title} has been removed from list`);
+      } else {
+          bot.sendMessage(chatId, 'Channel not found.');
+      }
+  }
+});
 bot.on('message', (msg) => {
 
   if (msg.text) {
@@ -100,7 +189,7 @@ bot.on('message', (msg) => {
 
           bot.sendMessage(chatId, "You have exited.◀ \n\nUse /start to resume.");
         }
-        else if (msg.text != "/start" && !msg.text.startsWith('/BotNewChannel')) {
+        else if (msg.text != "/start" && !msg.text.startsWith('/BotNewChannel') && msg.text !="/activechannels"&& msg.text !="/deletemenu") {
           if (!userStore[userId]) {
             userStore[userId] = {
               name: `user${Object.keys(userStore).length + 1}`
