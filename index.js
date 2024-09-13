@@ -61,6 +61,7 @@ bot.on('my_chat_member', (update) => {
 
 bot.onText(/\/activechannels/, (msg) => {
   const chatId = msg.chat.id;
+  if (msg.chat.type === 'private') {
 
   if (channels.length === 0) {
       bot.sendMessage(chatId, 'No channels available.');
@@ -79,11 +80,13 @@ bot.onText(/\/activechannels/, (msg) => {
           inline_keyboard: keyboard
       }
   });
+}
 });
 
 // Handle the /menu2 command
 bot.onText(/\/deletemenu/, (msg) => {
   const chatId = msg.chat.id;
+  if (msg.chat.type === 'private') {
 
   if (channels.length === 0) {
       bot.sendMessage(chatId, 'No channels available.');
@@ -101,7 +104,7 @@ bot.onText(/\/deletemenu/, (msg) => {
       reply_markup: {
           inline_keyboard: keyboard
       }
-  });
+  });}
 });
 
 // Handle callback queries from Menu 1
